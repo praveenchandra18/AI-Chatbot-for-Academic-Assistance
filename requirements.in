@@ -1,0 +1,5 @@
+pymupdf
+langchain_chroma
+langchain_ollama
+langchain_text_splitters
+langchain_core
