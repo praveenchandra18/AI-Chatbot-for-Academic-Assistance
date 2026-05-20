@@ -1,73 +1,90 @@
-import fitz
-from langchain_chroma import Chroma
-from langchain_ollama import OllamaEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from pathlib import Path
-from langchain_core.documents import Document
-import hashlib
+from langchain_ollama import ChatOllama
+from src.helper import get_vector_db
+from src.helper import get_llm_model
+from src.helper import get_retriever
+from collections import deque
+from langchain_core.messages import HumanMessage,SystemMessage,AIMessage
 
-def normalise_text(text):
-    return " ".join(text.split()).strip()
 
-def extract_docs_from_pdf(pdf_path):
-    pdf = fitz.open(pdf_path)
-    file_name = Path(pdf_path).name
-    docs = []
-    for page_num, page in enumerate(pdf):
-        text = page.get_text()
-        doc = Document(page_content=text,
-                       metadata = {
-                           "source": f"{file_name}",
-                           "page": page_num + 1
-                       })
-        docs.append(doc)
-    return docs
+chat_history = deque(maxlen=20)
+BASIC_SYSTEM_PROMPT = SystemMessage(
+    content=f"""
+You are a knowledgeable academic assistant.
 
-def extract_chunks_from_docs(docs, chunk_size=500, overlap=50):
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size,
-        chunk_overlap=overlap,
-        separators=["\n\n", "\n", " ", ""]
-    )
-    chunks = splitter.split_documents(docs)
-    return chunks
+Answer the user's question using ONLY the information
+provided in the context below.
 
-def create_chunk_id(chunk,doc_id):
-    normalised_text = normalise_text(chunk.page_content)
-    text_to_hash = f"{chunk.metadata['source']}|{chunk.metadata['page']}|{doc_id}|{normalised_text}"
-    # We get the text, make them into raw bites and hash them. Then we make it into readable hex string
-    chunk_id = hashlib.sha256(text_to_hash.encode('utf-8')).hexdigest()
-    return chunk_id
+Guidelines:
+- Do not fabricate information.
+- Do not use prior knowledge.
+- If the answer cannot be found, say:
+  "I don't know based on the provided context."
+- Keep answers concise and accurate.
+- Do not mention the existence of the context.
+- Mention the context source for every piece of information.
+"""
+)
 
-def add_chunks_to_vector_db(chunks):
+
+llm = get_llm_model()
+
+def get_similar_chunks(query, top_k=5):
     try:
-        embedding_model = OllamaEmbeddings(model="nomic-embed-text")
-        vector_db = Chroma(collection_name="pdf_texts", 
-                           embedding_function=embedding_model,
-                           persist_directory="./chroma_db")
-
-        chunk_ids = set(vector_db.get(include=[])["ids"])
-        new_chunks = []
-        new_ids = []
-        for i, chunk in enumerate(chunks):
-            chunk_id = create_chunk_id(chunk, i)
-            if(chunk_id not in chunk_ids):
-                new_chunks.append(chunk)
-                new_ids.append(chunk_id)
-
-        if new_chunks:
-            vector_db.add_documents(new_chunks, ids=new_ids)
-        return True
+        vector_db = get_vector_db()
+        hybrid_retriever = get_retriever()
+        results = hybrid_retriever.invoke(query)
+        # results = vector_db.similarity_search(query, k=top_k)
+        return results
     except Exception as e:
-        print(f"Error adding chunks to vector DB: {e}")
-        return False
+        print(f"Error retrieving similar chunks: {e}")
+        return []
+    
+def generate_prompt(question, similar_chunks):
+    # context = "\n\n".join([chunk.page_content for chunk in similar_chunks])
+    context = "\n\n"
+    for chunk in similar_chunks:
+        context+=f"""Source: {chunk.metadata["source"]}, Page number: {chunk.metadata["page"]}
+                     Content: {chunk.page_content}"""
+    system_message = SystemMessage(content=f"""{BASIC_SYSTEM_PROMPT}
+                Context:
+                {context}
+            """)
+    messages = [system_message,
+                *chat_history,
+                HumanMessage(question)]
+    
+    return messages
+    
+def call_llm(messages):
+    # response = llm.invoke(prompt)
+    for token in llm.stream(messages):
+        yield token
+    # return response.content
 
-def add_pdf_to_vector_db(pdf_path):
-    docs = extract_docs_from_pdf(pdf_path)
-    chunks = extract_chunks_from_docs(docs)
-    if add_chunks_to_vector_db(chunks):
-        print(f"Successfully added chunks from {pdf_path} to vector DB.")
+def ask(question):
+    # print("Extracting data...")
+    similar_chunks = get_similar_chunks(question)
+    # print("Extraction completed")
+    prompt = generate_prompt(question, similar_chunks)
+    # print("Retrieving answer...")
+    llm_response = call_llm(prompt)
+    return llm_response
+        
 
 if __name__ == "__main__":
-    pdf_path = "data/MACHINE LEARNING.pdf"
-    add_pdf_to_vector_db(pdf_path)
+    # query = "What is machine learning ?"
+    # # print(ask(query))
+    # response = ask(query)
+    # print("Assistant: ",end="")
+    # for chunk in response:
+    #     print(chunk.content,end="",flush=True)
+    while True:
+        user_input = input("User: ")
+        response = ask(user_input)
+        print("Assistant: ")
+        total_response=""
+        for chunk in response:
+            total_response+=chunk.content
+            print(chunk.content,end="",flush=True)
+        print()
+        chat_history.append(AIMessage(total_response))

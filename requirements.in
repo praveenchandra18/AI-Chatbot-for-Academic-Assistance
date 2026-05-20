@@ -1,5 +1,10 @@
 pymupdf
+langchain_classic
 langchain_chroma
 langchain_ollama
 langchain_text_splitters
 langchain_core
+langchain_community
+rank_bm25
+sentence-transformers
+torch
