@@ -16,7 +16,6 @@ def get_vector_db():
 async def add_pdf_to_vector_db(pdf_path):
     try:
         docs = await asyncio.to_thread(extract_docs_from_pdf,pdf_path)
-        # extract_docs_from_pdf(pdf_path)
         chunks =await asyncio.to_thread(extract_chunks_from_docs,docs)
         if await asyncio.to_thread(add_chunks_to_vector_db,chunks):
             print(f"Successfully added chunks from {pdf_path} to vector DB.")
@@ -49,5 +48,4 @@ def add_chunks_to_vector_db(chunks):
 
 if __name__ == "__main__":
     pdf_paths = ["data/MACHINE LEARNING.pdf"]
-    # add_pdf_to_vector_db(pdf_path)
     asyncio.run(process_all_pdfs(pdf_paths))

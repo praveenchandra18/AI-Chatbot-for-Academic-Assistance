@@ -1,7 +1,6 @@
-import asyncio
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
-from src.retrievers import build_retriever,build_history_aware_retriever
+from src.retrievers import build_retriever
 from src.config import EMBEDDING_MODEL,PERSISTANT_DIRECTORY_PATH
 
 
@@ -25,10 +24,6 @@ hybrid_retriever,rerankermodel = build_retriever(vector_db)
 
 async def get_similar_chunks(query):
     try:
-        # vector_db = get_vector_db()
-        # hybrid_retriever = get_retriever()
-        print("Query is :", query)
-        print(type(query))
         docs= await hybrid_retriever.ainvoke(query)
 
         pairs = [[query, doc.page_content]
@@ -38,7 +33,6 @@ async def get_similar_chunks(query):
 
         for doc, score in zip(docs, scores):
             doc.metadata["rerank_score"] = score
-                # results = vector_db.similarity_search(query, k=top_k)
 
         docs = sorted(
             zip(docs,scores),
@@ -46,7 +40,6 @@ async def get_similar_chunks(query):
             reverse=True
         )
         top_docs = [doc for doc, score in docs[:5]]
-        print("Top score:", docs[0][1])
         if docs[0][1]<0.2:
             return []
         return top_docs

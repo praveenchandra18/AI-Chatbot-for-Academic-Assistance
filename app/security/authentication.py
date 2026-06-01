@@ -5,7 +5,7 @@ from app.models import User
 from app.utils.password import verify_password
 import jwt
 from app.database import engine
-from app.config import SECRET_KEY
+from app.config import SECRET_KEY,HASH_ALGORITHM
 from datetime import datetime
 from app.utils.database import PasswordIncorrect,UserDoNotExists
 
@@ -17,7 +17,7 @@ def create_jwt_token(user_id):
     token = jwt.encode(
         payload,
         SECRET_KEY,
-        algorithm = "HS256"
+        algorithm = HASH_ALGORITHM
     )
     return token
 
@@ -25,19 +25,17 @@ def create_jwt_token(user_id):
 def verify_jwt(request:Request):
     token = request.cookies.get("access_token")
     if token is None:
-        print("access token is none")
         return None
     try:
         payload = jwt.decode(
             token,
             SECRET_KEY,
-            algorithms=["HS256"]
+            algorithms=[HASH_ALGORITHM]
         )
-        # print("payload retrieved ")
         return payload.get("user_id")
     
     except Exception as e:
-        print(f"exception happened at authentication: {e}")
+        print(f"Exception at authentication: {e}")
         None
 
 def authenticate_user(email,password) -> User:

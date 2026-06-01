@@ -26,3 +26,7 @@ rewrite the question as a standalone question.
 
 Do not answer the question at any case.
 """
+
+IRRELEVANT_QUESTION_ANSWER = f"""
+I couldn't find sufficient information in the uploaded materials to answer your question. This assistant is designed to provide answers only from the available course resources and documents. For questions that are outside the scope of the uploaded materials, require clarification, or need additional information, please contact your course instructor or professor.
+"""

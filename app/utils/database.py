@@ -35,7 +35,6 @@ def get_user_ui_info(user_id,chat_id=None):
     with Session(engine) as session:
         user = session.get(User,user_id)
         chats = get_chats(user_id,decreasing_order=True)
-        # DEFAULT VALUES
         current_chat = None
         messages = []
         if chat_id:
@@ -43,7 +42,7 @@ def get_user_ui_info(user_id,chat_id=None):
             if current_chat:
                 messages = get_messages(current_chat.id)
             return user,chats,messages,current_chat
-        # GET LAST CHAT
+        # Get Last Chat
         if chats:
             current_chat = chats[0]
             messages = get_messages(current_chat.id)
@@ -85,7 +84,6 @@ def get_messages(chat_id):
 
 def create_new_chat(user_id,title):
     with Session(engine) as session:
-        # user = session.get(User,user_id)
         chat = Chat(
             title=title,
             user_id=user_id
@@ -109,6 +107,7 @@ def add_message(chat_id,role,content):
         session.commit()
         session.refresh(mess_obj)
 
+# Streams the entire message to the frontend and saves the message into the db
 async def stream_and_save(response,chat_id):
     full_response = ""
     async for chunk in response:
@@ -116,6 +115,7 @@ async def stream_and_save(response,chat_id):
         yield chunk
 
     add_message(chat_id,"AI Assistant",full_response)
+
 
 def get_chat_history(chat_id,limit=20):
     with Session(engine) as session:
@@ -140,7 +140,4 @@ def get_chat_history(chat_id,limit=20):
                 AIMessage(content=message.content)
             )
     
-    print("printing chat history here")
-    for message in chat_history:
-        print(message)
     return chat_history

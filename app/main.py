@@ -1,17 +1,14 @@
-from fastapi import FastAPI,Request,Form,HTTPException
+from fastapi import FastAPI,Request,Form
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse,RedirectResponse,StreamingResponse
 from contextlib import asynccontextmanager
-from app.database import engine,create_db_and_tables
-from sqlmodel import Session,select,desc
-from app.models import User, Chat, Message
+from app.database import create_db_and_tables
 from starlette.middleware.sessions import SessionMiddleware
 import uvicorn
 from app.utils.password import hash_password
 from app.config import SECRET_KEY
 from app.security.authentication import authenticate_user,create_jwt_token,verify_jwt
-from datetime import datetime
 from app.utils.database import get_user_ui_info,add_message,stream_and_save
 from app.utils.database import create_new_user,create_new_chat,get_chat_history
 from app.utils.database import UserAlreadyExists,UserDoNotExists,PasswordIncorrect
@@ -41,7 +38,6 @@ def index():
 @app.get("/login")
 def login(request:Request):
     if not verify_jwt(request):
-        print("token is not fine")
         return templates.TemplateResponse(
             request,
             "login.html",
@@ -49,7 +45,6 @@ def login(request:Request):
                 "message":None
             }
         )
-    print("token is fine")
     return RedirectResponse(
             url="/chat",
             status_code=303
@@ -72,7 +67,7 @@ def add_user(
     except UserAlreadyExists as e:
         return "<p>User already Exists</p>"
     except Exception as e:
-        print(f"Got error: {e}")
+        return f"<p>Got error: {e}</p>"
     
     return RedirectResponse(
         url="/login",
@@ -129,7 +124,6 @@ def logout():
 @app.get("/chat")
 def chat_page(request: Request):
     user_id = verify_jwt(request)
-    print(user_id)
     if not user_id:
         return RedirectResponse(
             url="/login",
@@ -151,8 +145,6 @@ def chat_page(request: Request):
 def new_chat(
         request:Request,
         data:dict = Body(...)
-        # title:str = Form(...)
-        # message:str = Form(...)
     ):
     user_id = verify_jwt(request)
     if not user_id:
@@ -174,7 +166,6 @@ def get_chat(
         request : Request
     ):
     user_id = verify_jwt(request)
-    print("User id ",user_id)
     if not user_id:
         return RedirectResponse(
             url="/login",
