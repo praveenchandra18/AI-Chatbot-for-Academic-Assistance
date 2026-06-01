@@ -11,12 +11,15 @@ aiohttp==3.13.5
 aiosignal==1.4.0
     # via aiohttp
 annotated-doc==0.0.4
-    # via typer
+    # via
+    #   fastapi
+    #   typer
 annotated-types==0.7.0
     # via pydantic
 anyio==4.13.0
     # via
     #   httpx
+    #   starlette
     #   watchfiles
 attrs==26.1.0
     # via
@@ -51,6 +54,8 @@ dataclasses-json==0.6.7
     # via langchain-community
 durationpy==0.10
     # via kubernetes
+fastapi==0.136.3
+    # via -r requirements.in
 filelock==3.29.0
     # via
     #   huggingface-hub
@@ -104,6 +109,8 @@ importlib-metadata==8.7.1
     # via opentelemetry-api
 importlib-resources==7.1.0
     # via chromadb
+itsdangerous==2.2.0
+    # via -r requirements.in
 jinja2==3.1.6
     # via torch
 joblib==1.5.3
@@ -235,11 +242,13 @@ pybase64==1.4.3
 pydantic==2.13.4
     # via
     #   chromadb
+    #   fastapi
     #   langchain-classic
     #   langchain-core
     #   langsmith
     #   ollama
     #   pydantic-settings
+    #   sqlmodel
 pydantic-core==2.46.4
     # via pydantic
 pydantic-settings==2.14.1
@@ -248,6 +257,8 @@ pydantic-settings==2.14.1
     #   langchain-community
 pygments==2.20.0
     # via rich
+pyjwt==2.13.0
+    # via -r requirements.in
 pymupdf==1.27.2.3
     # via -r requirements.in
 pypika==0.51.1
@@ -260,6 +271,8 @@ python-dotenv==1.2.2
     # via
     #   pydantic-settings
     #   uvicorn
+python-multipart==0.0.29
+    # via -r requirements.in
 pyyaml==6.0.3
     # via
     #   chromadb
@@ -320,6 +333,11 @@ sqlalchemy==2.0.49
     # via
     #   langchain-classic
     #   langchain-community
+    #   sqlmodel
+sqlmodel==0.0.38
+    # via -r requirements.in
+starlette==1.1.0
+    # via fastapi
 sympy==1.14.0
     # via torch
 tenacity==9.1.4
@@ -352,6 +370,7 @@ typing-extensions==4.15.0
     #   aiosignal
     #   anyio
     #   chromadb
+    #   fastapi
     #   grpcio
     #   huggingface-hub
     #   langchain-core
@@ -364,6 +383,8 @@ typing-extensions==4.15.0
     #   pydantic-core
     #   referencing
     #   sqlalchemy
+    #   sqlmodel
+    #   starlette
     #   torch
     #   typing-inspect
     #   typing-inspection
@@ -371,6 +392,7 @@ typing-inspect==0.9.0
     # via dataclasses-json
 typing-inspection==0.4.2
     # via
+    #   fastapi
     #   pydantic
     #   pydantic-settings
 urllib3==2.7.0

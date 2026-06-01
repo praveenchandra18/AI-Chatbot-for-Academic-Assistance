@@ -1,49 +1,36 @@
-import fitz
+import asyncio
+from src.extractor import extract_docs_from_pdf
+from src.chunker import extract_chunks_from_docs
+from src.chunker import create_chunk_id
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from pathlib import Path
-from langchain_core.documents import Document
-import hashlib
-from src.helper import get_vector_db
+from src.config import EMBEDDING_MODEL,PERSISTANT_DIRECTORY_PATH
 
-def normalise_text(text):
-    return " ".join(text.split()).strip()
+def get_vector_db():
+    embedding_model = OllamaEmbeddings(EMBEDDING_MODEL)
+    vector_db = Chroma(collection_name="pdf_texts", 
+                       embedding_function=embedding_model,
+                       persist_directory=PERSISTANT_DIRECTORY_PATH)
+    return vector_db
 
-def extract_docs_from_pdf(pdf_path):
-    pdf = fitz.open(pdf_path)
-    file_name = Path(pdf_path).name
-    docs = []
-    for page_num, page in enumerate(pdf):
-        text = page.get_text()
-        doc = Document(page_content=text,
-                       metadata = {
-                           "source": f"{file_name}",
-                           "page": page_num + 1
-                       })
-        docs.append(doc)
-    return docs
+async def add_pdf_to_vector_db(pdf_path):
+    try:
+        docs = await asyncio.to_thread(extract_docs_from_pdf,pdf_path)
+        # extract_docs_from_pdf(pdf_path)
+        chunks =await asyncio.to_thread(extract_chunks_from_docs,docs)
+        if await asyncio.to_thread(add_chunks_to_vector_db,chunks):
+            print(f"Successfully added chunks from {pdf_path} to vector DB.")
+    except Exception as e:
+        print(f"Error processing {pdf_path} : {e}")
 
-def extract_chunks_from_docs(docs, chunk_size=500, overlap=50):
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size,
-        chunk_overlap=overlap,
-        separators=["\n\n", "\n", " ", ""]
+async def process_all_pdfs(pdf_paths:list):
+    await asyncio.gather(
+        *(add_pdf_to_vector_db(pdf_path) for pdf_path in pdf_paths)
     )
-    chunks = splitter.split_documents(docs)
-    return chunks
-
-def create_chunk_id(chunk,chunk_index):
-    normalised_text = normalise_text(chunk.page_content)
-    text_to_hash = f"{chunk.metadata['source']}|{chunk.metadata['page']}|{chunk_index}|{normalised_text}"
-    # We get the text, make them into raw bites and hash them. Then we make it into readable hex string
-    chunk_id = hashlib.sha256(text_to_hash.encode('utf-8')).hexdigest()
-    return chunk_id
 
 def add_chunks_to_vector_db(chunks):
     try:
         vector_db = get_vector_db()
-
         chunk_ids = set(vector_db.get(include=[])["ids"])
         new_chunks = []
         new_ids = []
@@ -60,12 +47,7 @@ def add_chunks_to_vector_db(chunks):
         print(f"Error adding chunks to vector DB: {e}")
         return False
 
-def add_pdf_to_vector_db(pdf_path):
-    docs = extract_docs_from_pdf(pdf_path)
-    chunks = extract_chunks_from_docs(docs)
-    if add_chunks_to_vector_db(chunks):
-        print(f"Successfully added chunks from {pdf_path} to vector DB.")
-
 if __name__ == "__main__":
-    pdf_path = "data/MACHINE LEARNING.pdf"
-    add_pdf_to_vector_db(pdf_path)
+    pdf_paths = ["data/MACHINE LEARNING.pdf"]
+    # add_pdf_to_vector_db(pdf_path)
+    asyncio.run(process_all_pdfs(pdf_paths))

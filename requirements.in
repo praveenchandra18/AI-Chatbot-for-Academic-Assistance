@@ -8,3 +8,8 @@ langchain_community
 rank_bm25
 sentence-transformers
 torch
+fastapi
+sqlmodel
+python-multipart
+itsdangerous
+pyjwt

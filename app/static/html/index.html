@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Chatbot for Academic Assistance</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        /* Navbar */
+
+        nav {
+            background-color: #0f172a;
+            color: white;
+            padding: 18px 50px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            position: sticky;
+            top: 0;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #38bdf8;
+        }
+
+        .login-btn {
+            background-color: #38bdf8;
+            color: black;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .login-btn:hover {
+            background-color: #0ea5e9;
+            color: white;
+        }
+
+        /* Hero Section */
+
+        .hero {
+            min-height: 90vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+
+            padding: 40px;
+        }
+
+        .hero-content {
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+
+        .hero p {
+            font-size: 22px;
+            margin-bottom: 30px;
+            color: #475569;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .primary-btn {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .secondary-btn {
+            background-color: white;
+            border: 2px solid #2563eb;
+            color: #2563eb;
+        }
+
+        .secondary-btn:hover {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        /* Features */
+
+        .section {
+            padding: 80px 50px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 40px;
+            margin-bottom: 50px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .feature-card {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 5px 15px rgba(0,0,0,0.08);
+            transition: 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 15px;
+            color: #2563eb;
+        }
+
+        /* Tech Stack */
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .tech-item {
+            background-color: #dbeafe;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+
+        /* Architecture */
+
+        .architecture {
+            background-color: #0f172a;
+            color: white;
+            padding: 50px;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            font-size: 16px;
+        }
+
+        /* Footer */
+
+        footer {
+            background-color: #0f172a;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 50px;
+        }
+
+        /* Responsive */
+
+        @media(max-width: 768px) {
+
+            nav {
+                flex-direction: column;
+                gap: 15px;
+                padding: 20px;
+            }
+
+            .hero h1 {
+                font-size: 42px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .section {
+                padding: 60px 20px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+
+    <nav>
+        <div class="logo">Academic AI Assistant</div>
+
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#tech">Tech Stack</a>
+            <a href="#architecture">Architecture</a>
+            <a href="#about">About</a>
+
+            <a href="/login" class="login-btn">Login</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <h1>AI Chatbot for Academic Assistance</h1>
+
+            <p>
+                An intelligent academic assistant powered by LLMs,
+                Retrieval-Augmented Generation (RAG),
+                Hybrid Search, and Local AI Models.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="/chat" class="btn primary-btn">Start Chatting</a>
+                <a href="#features" class="btn secondary-btn">Explore Features</a>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Features -->
+
+    <section class="section" id="features">
+
+        <h2 class="section-title">Features</h2>
+
+        <div class="features-grid">
+
+            <div class="feature-card">
+                <h3>PDF Question Answering</h3>
+                <p>
+                    Upload academic PDFs and ask contextual questions directly from documents.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Hybrid Search</h3>
+                <p>
+                    Combines BM25 keyword search with semantic vector retrieval for higher accuracy.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Conversation Memory</h3>
+                <p>
+                    Maintains chat history and contextual continuity across conversations.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Local LLM Support</h3>
+                <p>
+                    Uses Ollama to run AI models locally without external API costs.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>FastAPI Backend</h3>
+                <p>
+                    Async backend architecture designed for scalability and performance.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Vector Database</h3>
+                <p>
+                    ChromaDB stores embeddings for fast semantic document retrieval.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Tech Stack -->
+
+    <section class="section" id="tech">
+
+        <h2 class="section-title">Tech Stack</h2>
+
+        <div class="tech-stack">
+
+            <div class="tech-item">Python</div>
+            <div class="tech-item">FastAPI</div>
+            <div class="tech-item">LangChain</div>
+            <div class="tech-item">Ollama</div>
+            <div class="tech-item">ChromaDB</div>
+            <div class="tech-item">SQLite</div>
+            <div class="tech-item">SQLModel</div>
+            <div class="tech-item">Sentence Transformers</div>
+            <div class="tech-item">BM25</div>
+            <div class="tech-item">PyMuPDF</div>
+
+        </div>
+
+    </section>
+
+    <!-- Architecture -->
+
+    <section class="section" id="architecture">
+
+        <h2 class="section-title">System Architecture</h2>
+
+        <div class="architecture">
+
+<pre>
+User Query
+    │
+    ▼
+FastAPI Backend
+    │
+    ▼
+Retriever Pipeline
+ ┌───────────────┐
+ │ BM25 Search   │
+ │ Vector Search │
+ └───────────────┘
+    │
+Hybrid Ranking
+    │
+    ▼
+Relevant Context
+    │
+    ▼
+LLM (Ollama)
+    │
+    ▼
+AI Response
+</pre>
+
+        </div>
+
+    </section>
+
+    <!-- About -->
+
+    <section class="section" id="about">
+
+        <h2 class="section-title">About the Project</h2>
+
+        <div class="feature-card">
+
+            <p>
+                This project demonstrates practical implementation of:
+            </p>
+
+            <br>
+
+            <ul style="padding-left: 20px;">
+
+                <li>Retrieval-Augmented Generation (RAG)</li>
+                <li>Hybrid Information Retrieval</li>
+                <li>LLM Application Development</li>
+                <li>Async Python Backend Engineering</li>
+                <li>Vector Databases & Embeddings</li>
+                <li>Conversation Memory Systems</li>
+                <li>Local AI Model Deployment</li>
+
+            </ul>
+
+        </div>
+
+    </section>
+
+    <!-- Footer -->
+
+    <footer>
+
+        <p>
+            AI Chatbot for Academic Assistance © 2026
+        </p>
+
+    </footer>
+
+</body>
+</html>
