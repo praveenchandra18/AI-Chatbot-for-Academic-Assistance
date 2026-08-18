@@ -1,8 +1,10 @@
 from langchain_ollama import ChatOllama
 from src.config import LLM_MODEL
 from langchain_core.messages import HumanMessage,SystemMessage
-from src.vectorstore import get_similar_chunks
+from src.vectorstore import get_similar_chunks, initialise_vectorstore
 from src.config import BASIC_SYSTEM_PROMPT, RE_WRITE_PROMPT, IRRELEVANT_QUESTION_ANSWER
+
+llm = None
 
 def build_llm():
     print("Building LLM Model: ",end="")
@@ -12,14 +14,6 @@ def build_llm():
                      validate_model_on_init=True)
     print("Done")
     return llm
-
-llm = build_llm()
-
-def get_llm_model():
-    return llm
-
-llm = get_llm_model()
-
     
 def generate_prompt(question, similar_chunks, chat_history):
     context = "\n\n"
@@ -62,4 +56,8 @@ async def ask(question,chat_history):
         return yeild_nothing()
     prompt = generate_prompt(question, similar_chunks, chat_history)
     return call_llm(prompt)
-        
+
+def initialise():
+    global llm
+    llm = build_llm()
+    initialise_vectorstore()

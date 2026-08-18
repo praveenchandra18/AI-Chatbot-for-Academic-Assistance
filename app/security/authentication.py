@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
-from fastapi import Request
+from fastapi import HTTPException, Request
 from sqlmodel import Session,select
+from starlette import status
 from app.models import User
 from app.utils.password import verify_password
 import jwt
@@ -55,3 +56,13 @@ def authenticate_user(email,password) -> User:
             )
         
     return user
+
+
+def get_user_id(request:Request):
+    user_id = verify_jwt(request)
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    return user_id

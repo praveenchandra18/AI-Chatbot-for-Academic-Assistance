@@ -3,6 +3,10 @@ from langchain_ollama import OllamaEmbeddings
 from src.retrievers import build_retriever
 from src.config import EMBEDDING_MODEL,PERSISTANT_DIRECTORY_PATH
 
+embedding_model = None
+vector_db = None
+hybrid_retriever = None
+rerankermodel = None
 
 def build_db():
     print("Embedding model building started: ",end="")
@@ -15,12 +19,6 @@ def build_db():
     print("Done")
     return embedding_model,vector_db
 
-embedding_model, vector_db = build_db()
-
-def get_vector_db():
-    return vector_db
-
-hybrid_retriever,rerankermodel = build_retriever(vector_db)
 
 async def get_similar_chunks(query):
     try:
@@ -46,3 +44,12 @@ async def get_similar_chunks(query):
     except Exception as e:
         print(f"Error retrieving similar chunks: {e}")
         return []
+
+def initialise_vectorstore():
+    global embedding_model
+    global vector_db
+    global hybrid_retriever
+    global rerankermodel
+
+    embedding_model, vector_db = build_db()
+    hybrid_retriever,rerankermodel = build_retriever(vector_db)

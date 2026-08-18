@@ -1,7 +1,8 @@
-from fastapi import FastAPI,Request,Form
+from fastapi import FastAPI,Request,Form, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse,RedirectResponse,StreamingResponse
+from fastapi.exceptions import HTTPException
 from contextlib import asynccontextmanager
 from app.database import create_db_and_tables
 from starlette.middleware.sessions import SessionMiddleware
@@ -12,11 +13,13 @@ from app.security.authentication import authenticate_user,create_jwt_token,verif
 from app.utils.database import get_user_ui_info,add_message,stream_and_save
 from app.utils.database import create_new_user,create_new_chat,get_chat_history
 from app.utils.database import UserAlreadyExists,UserDoNotExists,PasswordIncorrect
-from src.llm import ask
+from src.llm import initialise,ask
 from fastapi import Body
+from app.security.authentication import get_user_id
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    initialise()
     create_db_and_tables()
     yield
 
@@ -31,9 +34,21 @@ app.add_middleware(
     secret_key=SECRET_KEY
 )
 
+@app.exception_handler(HTTPException)
+async def global_exception_handler(request:Request,exc:HTTPException):
+    return RedirectResponse(
+                url="/login",
+                status_code=303
+            )
+
+
 @app.get("/")
-def index():
-    return FileResponse("app/static/html/index.html")
+def index(request:Request):
+    # return FileResponse("app/static/html/index.html")
+    return templates.TemplateResponse(
+        request,
+        "index.html"
+    )
 
 @app.get("/login")
 def login(request:Request):
@@ -51,8 +66,12 @@ def login(request:Request):
         )
 
 @app.get("/signup")
-def signup_page():
-    return FileResponse("app/static/html/signup.html")
+def signup_page(request:Request):
+    # return FileResponse("app/static/html/signup.html")
+    return templates.TemplateResponse(
+            request,
+            "signup.html"
+        )
 
 @app.post("/signup")
 def add_user(
@@ -122,13 +141,7 @@ def logout():
     return response      
 
 @app.get("/chat")
-def chat_page(request: Request):
-    user_id = verify_jwt(request)
-    if not user_id:
-        return RedirectResponse(
-            url="/login",
-            status_code=303
-        )
+def chat_page(request: Request,user_id = Depends(get_user_id)):
     user,chats,messages,current_chat = get_user_ui_info(user_id)
     return templates.TemplateResponse(
         request,
@@ -144,15 +157,9 @@ def chat_page(request: Request):
 @app.post("/new-chat")
 def new_chat(
         request:Request,
+        user_id = Depends(get_user_id),
         data:dict = Body(...)
-    ):
-    user_id = verify_jwt(request)
-    if not user_id:
-        return RedirectResponse(
-            url="/login",
-            status_code=303
-        )
-    
+    ):    
     chat_id = create_new_chat(user_id,data["title"])
     return {
             "chat_id": chat_id,
@@ -163,14 +170,9 @@ def new_chat(
 @app.get("/chat/{chat_id}")
 def get_chat(
         chat_id : int,
-        request : Request
+        request : Request,
+        user_id = Depends(get_user_id)
     ):
-    user_id = verify_jwt(request)
-    if not user_id:
-        return RedirectResponse(
-            url="/login",
-            status_code=303
-        )
     user,chats,messages,current_chat = get_user_ui_info(user_id,chat_id)
     return templates.TemplateResponse(
         request,
@@ -187,15 +189,10 @@ def get_chat(
 @app.post("/chat/{chat_id}")
 async def send_message(
     chat_id:int,
-    request:Request,
+    # request:Request,
+    user_id = Depends(get_user_id),
     data:dict = Body(...)
 ):
-    user_id = verify_jwt(request)
-    if not user_id:
-        return RedirectResponse(
-            url="/login",
-            status_code=303
-        )
     chat_history = get_chat_history(chat_id)
     response = await ask(data["message"],chat_history)
     add_message(chat_id,"User",data["message"])
@@ -210,5 +207,5 @@ if __name__ == "__main__":
         "app.main:app",
         host="localhost",
         port=8000,
-        reload=True
+        # reload=True
     )
